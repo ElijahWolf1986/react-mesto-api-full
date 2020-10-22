@@ -1,27 +1,27 @@
 const User = require("../models/user");
+require('dotenv').config();
 const bcrypt = require("bcryptjs");
 const ConflictError = require("../errors/ConflictError.js");
 const UnauthorizedError = require("../errors/UnauthorizedError.js");
+const BadRequestError = require("../errors/BadRequestError.js");
+const NotFoundError = require("../errors/NotFoundError.js");
+const ForbiddenError = require("../errors/ForbiddenError.js");
+
 const jwt = require("jsonwebtoken");
+const { SECRET, SALT_INT } = process.env;
 
-const SALT_INT = 10;
-const SECRET = "hello";
-
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
     .catch(() => {
-      res
-        .status(500)
-        .send({ message: "Ошибка сервера. Что-то пошло не так..." });
+      next(new NotFoundError("Не удалось найти пользователей"));
     });
 };
 
-const getUserById = async (req, res) => {
-  const user = await User.findById(req.params.id).orFail(() =>
-    res.status(404).send({ message: "Такого пользователя нет!" })
-  );
-  res.status(200).send({ data: user });
+const getUserById = (req, res, next) => {
+  User.findById(req.params.id)
+    .then((user) => res.status(200).send({ data: user }))
+    .catch(() => next(new NotFoundError("Такого пользователя не существует")));
 };
 
 const createUser = (req, res, next) => {
@@ -31,21 +31,25 @@ const createUser = (req, res, next) => {
     try {
       const user = await User.findOne({ email });
       if (user) {
-        return next(new ConflictError("Пользователь с таким email уже есть")); //проверить правильность отображения ошибки
+        return next(new ConflictError("Пользователь с таким email уже есть"));
       }
       return (
         User.create({ name, about, avatar, email, password: hash })
           .then((newUser) => {
-            return res.status(200).send({ data: newUser });
+            return res
+              .status(200)
+              .send({ data: { name, about, avatar, email } });
           })
           // eslint-disable-next-line consistent-return
           .catch((err) => {
             if (err.name === "ValidationError") {
-              return res.status(400).send({ message: err.message });
+              return next(
+                new BadRequestError("Произошла ошибка, пользователь не создан")
+              );
             }
           })
       );
-    } catch (e) {
+    } catch (err) {
       return res.status(500).send({ message: "Что-то пошло не так.." });
     }
   });
@@ -54,7 +58,7 @@ const createUser = (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return next(new UnauthorizedError("Неправильный логин или пароль"));
     }
@@ -67,8 +71,8 @@ const login = async (req, res, next) => {
 
       return res.status(200).send({ token });
     });
-  } catch (e) {
-    return res.status(500).send({ message: "Что-то пошло не так.." });
+  } catch (err) {
+    return next(new ForbiddenError("Доступ запрещен"));
   }
 };
 
