@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-underscore-dangle": "off"
+
+  },
+  "extends": "airbnb-base"
+}
