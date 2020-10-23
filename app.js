@@ -11,6 +11,11 @@ const cardsRouter = require("./routes/cards").router;
 const { login, createUser } = require("./controllers/users");
 const NotFoundError = require("./errors/NotFoundError.js");
 const { auth } = require("./middlewares/auth");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+const {
+  validateSignin,
+  validateSignup,
+} = require("./middlewares/validationJoi");
 const cors = require("cors");
 
 app.use(cors());
@@ -21,11 +26,18 @@ mongoose.connect("mongodb://localhost:27017/mestodb", {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+app.use(requestLogger);
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.post("/signin", login);
-app.post("/signup", createUser);
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
+app.post("/signin", validateSignin, login);
+app.post("/signup", validateSignup, createUser);
 
 app.use("/users", auth, usersRouter);
 
@@ -34,6 +46,8 @@ app.use("/cards", auth, cardsRouter);
 app.use(() => {
   throw new NotFoundError({ message: "Запрашиваемый ресурс не найден" });
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 

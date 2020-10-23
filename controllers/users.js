@@ -1,5 +1,5 @@
 const User = require("../models/user");
-require('dotenv').config();
+require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const ConflictError = require("../errors/ConflictError.js");
 const UnauthorizedError = require("../errors/UnauthorizedError.js");
@@ -8,7 +8,7 @@ const NotFoundError = require("../errors/NotFoundError.js");
 const ForbiddenError = require("../errors/ForbiddenError.js");
 
 const jwt = require("jsonwebtoken");
-const { SECRET, SALT_INT } = process.env;
+const { SECRET } = process.env;
 
 const getAllUsers = (req, res, next) => {
   User.find({})
@@ -27,7 +27,7 @@ const getUserById = (req, res, next) => {
 const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
-  return bcrypt.hash(password, SALT_INT, async (error, hash) => {
+  return bcrypt.hash(password, 10, async (error, hash) => {
     try {
       const user = await User.findOne({ email });
       if (user) {
@@ -35,7 +35,7 @@ const createUser = (req, res, next) => {
       }
       return (
         User.create({ name, about, avatar, email, password: hash })
-          .then((newUser) => {
+          .then((user) => {
             return res
               .status(200)
               .send({ data: { name, about, avatar, email } });
