@@ -1,4 +1,6 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError.js');
+const ForbiddenError = require('../errors/ForbiddenError.js');
 
 const getAllCards = (req, res) => {
   Card.find({})
@@ -17,12 +19,10 @@ const createCard = (req, res) => {
     // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({
-            message:
-              'переданы некорректные данные в методы создания пользователя!',
-          });
+        return res.status(400).send({
+          message:
+            'переданы некорректные данные в методы создания пользователя!',
+        });
       }
       return res
         .status(500)
@@ -30,11 +30,21 @@ const createCard = (req, res) => {
     });
 };
 
-const deleteCard = async (req, res) => {
-  const deletedCard = await Card.findByIdAndRemove(
-    req.params.cardId,
-  ).orFail(() => res.status(404).send({ message: 'Такой карты нет!' }));
-  res.status(200).send({ data: deletedCard });
+const deleteCard = (req, res, next) => {
+  const { cardId } = req.params;
+  const { userId } = req.body;
+
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (userId !== String(card.owner)) {
+        return next(new ForbiddenError('Вы не можете удалять чужие карточки'));
+      }
+      return (
+        Card.findByIdAndRemove(cardId)
+          .then((deletedCard) => res.status(200).send({ data: deletedCard }))
+          .catch(() => next(new NotFoundError('карта не найдена')))
+      );
+    });
 };
 
 module.exports = {

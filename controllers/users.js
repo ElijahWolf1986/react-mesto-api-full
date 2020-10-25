@@ -55,7 +55,7 @@ const createUser = (req, res, next) => {
           .catch((err) => {
             if (err.name === 'ValidationError') {
               return next(
-                new BadRequestError('Произошла ошибка, пользователь не создан'),
+                new BadRequestError(err.message),
               );
             }
           })

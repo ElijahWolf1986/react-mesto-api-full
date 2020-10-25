@@ -48,8 +48,11 @@ app.use(() => {
 app.use(errorLogger);
 
 app.use(errors());
-
-app.use((err, req, res) => res.status(err.status || 500).send({ message: err.message }));
+// eslint-disable-next-line no-console
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).send({ message: err.message });
+  next();
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
