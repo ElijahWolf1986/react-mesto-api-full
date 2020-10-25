@@ -1,4 +1,4 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 
 const getAllCards = (req, res) => {
   Card.find({})
@@ -6,7 +6,7 @@ const getAllCards = (req, res) => {
     .catch(() => {
       res
         .status(500)
-        .send({ message: "Ошибка сервера. Что-то пошло не так..." });
+        .send({ message: 'Ошибка сервера. Что-то пошло не так...' });
     });
 };
 
@@ -16,24 +16,24 @@ const createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     // eslint-disable-next-line consistent-return
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(400)
           .send({
             message:
-              "переданы некорректные данные в методы создания пользователя!",
+              'переданы некорректные данные в методы создания пользователя!',
           });
       }
       return res
         .status(500)
-        .send({ message: "Ошибка сервера. Что то пошло не так.." });
+        .send({ message: 'Ошибка сервера. Что то пошло не так..' });
     });
 };
 
 const deleteCard = async (req, res) => {
   const deletedCard = await Card.findByIdAndRemove(
-    req.params.cardId
-  ).orFail(() => res.status(404).send({ message: "Такой карты нет!" }));
+    req.params.cardId,
+  ).orFail(() => res.status(404).send({ message: 'Такой карты нет!' }));
   res.status(200).send({ data: deletedCard });
 };
 

@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
       validator(v) {
         return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/gm.test(v);
       },
-      message: "Вы ввели неправильную ссылку!",
+      message: 'Вы ввели неправильную ссылку!',
     },
   },
   email: {
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
       validator(v) {
         return validator.isEmail(v);
       },
-      message: "Вы ввели неправильную электронную почту!",
+      message: 'Вы ввели неправильную электронную почту!',
     },
   },
   password: {
@@ -43,4 +43,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);

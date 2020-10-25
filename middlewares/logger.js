@@ -1,13 +1,13 @@
-const winston = require("winston");
-const expressWinston = require("express-winston");
-const path = require("path");
+const winston = require('winston');
+const expressWinston = require('express-winston');
+const path = require('path');
 
-const dirPath = path.join(__dirname, "../logs");
+const dirPath = path.join(__dirname, '../logs');
 
 const requestLogger = expressWinston.logger({
   transports: [
     new winston.transports.File({
-      filename: path.join(dirPath, "request.log"),
+      filename: path.join(dirPath, 'request.log'),
     }),
   ],
   format: winston.format.json(),
@@ -16,7 +16,7 @@ const requestLogger = expressWinston.logger({
 const errorLogger = expressWinston.errorLogger({
   transports: [
     new winston.transports.File({
-      filename: path.join(dirPath, "error.log"),
+      filename: path.join(dirPath, 'error.log'),
     }),
   ],
   format: winston.format.json(),
