@@ -6,6 +6,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError.js');
 const BadRequestError = require('../errors/BadRequestError.js');
 const NotFoundError = require('../errors/NotFoundError.js');
 const ForbiddenError = require('../errors/ForbiddenError.js');
+const ConflictError = require('../errors/ConflictError.js');
 
 const { SECRET } = process.env;
 
@@ -37,7 +38,7 @@ const createUser = (req, res, next) => {
     try {
       const user = await User.findOne({ email });
       if (user) {
-        return next(new BadRequestError('Что-то пошло не так'));
+        return next(new ConflictError('пользователь с таким Email уже существует'));
       }
       return (
         User.create({
@@ -63,7 +64,7 @@ const createUser = (req, res, next) => {
           })
       );
     } catch (err) {
-      return res.status(500).send({ message: 'Что-то пошло не так..' });
+      return next (new BadRequestError('Что-то пошло не так'))
     }
   });
 };

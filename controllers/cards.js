@@ -1,14 +1,13 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError.js');
 const ForbiddenError = require('../errors/ForbiddenError.js');
+const BadRequestError = require('../errors/BadRequestError.js');
 
 const getAllCards = (req, res) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
     .catch(() => {
-      res
-        .status(500)
-        .send({ message: 'Ошибка сервера. Что-то пошло не так...' });
+      next (new BadRequestError('Что-то пошло не так'))
     });
 };
 
@@ -24,9 +23,7 @@ const createCard = (req, res) => {
             'переданы некорректные данные в методы создания карточки!',
         });
       }
-      return res
-        .status(500)
-        .send({ message: 'Ошибка сервера. Что то пошло не так..' });
+      return next (new BadRequestError('Что-то пошло не так'))
     });
 };
 
