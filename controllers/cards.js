@@ -3,15 +3,15 @@ const NotFoundError = require('../errors/NotFoundError.js');
 const ForbiddenError = require('../errors/ForbiddenError.js');
 const BadRequestError = require('../errors/BadRequestError.js');
 
-const getAllCards = (req, res) => {
+const getAllCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
     .catch(() => {
-      next (new BadRequestError('Что-то пошло не так'))
+      next(new BadRequestError('Что-то пошло не так'));
     });
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link, owner } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
@@ -23,7 +23,7 @@ const createCard = (req, res) => {
             'переданы некорректные данные в методы создания карточки!',
         });
       }
-      return next (new BadRequestError('Что-то пошло не так'))
+      return next(new BadRequestError('Что-то пошло не так'));
     });
 };
 

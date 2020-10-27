@@ -64,7 +64,7 @@ const createUser = (req, res, next) => {
           })
       );
     } catch (err) {
-      return next (new BadRequestError('Что-то пошло не так'))
+      return next(new BadRequestError('Что-то пошло не так'));
     }
   });
 };
