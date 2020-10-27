@@ -21,7 +21,7 @@ const createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({
           message:
-            'переданы некорректные данные в методы создания пользователя!',
+            'переданы некорректные данные в методы создания карточки!',
         });
       }
       return res
@@ -32,11 +32,13 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.body;
 
   Card.findById(req.params.cardId)
     .then((card) => {
-      if (userId !== String(card.owner)) {
+      if (!card) {
+        return next(new NotFoundError('Такой карты не существует'));
+      }
+      if (req.user !== card.owner) {
         return next(new ForbiddenError('Вы не можете удалять чужие карточки'));
       }
       return (

@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 require('dotenv').config();
-const ConflictError = require('../errors/ConflictError.js');
 const UnauthorizedError = require('../errors/UnauthorizedError.js');
 const BadRequestError = require('../errors/BadRequestError.js');
 const NotFoundError = require('../errors/NotFoundError.js');
@@ -20,7 +19,12 @@ const getAllUsers = (req, res, next) => {
 
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        return next(new NotFoundError('Такого пользователя не существует'));
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch(() => next(new NotFoundError('Такого пользователя не существует')));
 };
 
@@ -33,7 +37,7 @@ const createUser = (req, res, next) => {
     try {
       const user = await User.findOne({ email });
       if (user) {
-        return next(new ConflictError('Пользователь с таким email уже есть'));
+        return next(new BadRequestError('Что-то пошло не так'));
       }
       return (
         User.create({
@@ -54,9 +58,7 @@ const createUser = (req, res, next) => {
           // eslint-disable-next-line consistent-return
           .catch((err) => {
             if (err.name === 'ValidationError') {
-              return next(
-                new BadRequestError(err.message),
-              );
+              return next(new BadRequestError(err.message));
             }
           })
       );
