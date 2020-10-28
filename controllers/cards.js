@@ -18,12 +18,8 @@ const createCard = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message:
-            'переданы некорректные данные в методы создания карточки!',
-        });
+        return next(new BadRequestError('Переданы некорректные данные в методы создания карточки!'));
       }
-      return next(new BadRequestError('Что-то пошло не так'));
     });
 };
 
